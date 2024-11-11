@@ -1,0 +1,18 @@
+{% extends "main/base.html" %}
+
+{% block title %}Услуги - Luxe Lagoon{% endblock %}
+{% load static %}
+{% block content %}
+    <h1>Наши услуги</h1>
+    <div class="services">
+        {% for service in services %}
+            <div class="service-card">
+                <img src="{% static 'main/images/service_image_placeholder.jpg' %}" alt="{{ service.name }}">
+                <h2>{{ service.name }}</h2>
+                <p>{{ service.description }}</p>
+                <p>Цена: {{ service.price }} руб.</p>
+                <a href="{% url 'book_service' service.id %}" class="order-button">Заказать...</a>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

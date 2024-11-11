@@ -1,0 +1,219 @@
+/* Основные стили */
+body {
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    background-color: #2D2B2B;
+    color: #ffffff;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Стили для навигации */
+nav {
+    background-color: #1F1D1D;
+    padding: 10px;
+    display: flex;
+    justify-content: space-around;
+}
+
+nav a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 16px;
+    padding: 8px 16px;
+}
+
+nav a.active, nav a:hover {
+    background-color: #FFC107;
+    color: #000000;
+    border-radius: 5px;
+}
+
+.error-message {
+    color: #ff4d4d; /* Красный цвет для ошибок */
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+/* Стиль для основного контейнера */
+.container {
+    flex: 1;
+    padding: 20px;
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+
+/* Стиль для карточек услуг */
+.service-card {
+    background-color: #333333;
+    color: #ffffff;
+    margin: 20px;
+    padding: 20px;
+    border-radius: 5px;
+    width: 45%;
+    display: inline-block;
+    vertical-align: top;
+    text-align: left;
+}
+
+.service-card img {
+    width: 100%;
+    border-radius: 5px;
+}
+
+.service-card h2 {
+    color: #FFC107;
+}
+
+.service-card p {
+    margin: 10px 0;
+}
+
+.order-button {
+    color: #000000;
+    background-color: #FFC107;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.order-button:hover {
+    background-color: #FFB300;
+}
+
+/* Иконка меню */
+.menu-icon {
+    cursor: pointer;
+    font-size: 24px;
+    color: #ffffff;
+}
+
+/* Стили для боковой шторки */
+.sidebar {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    top: 0;
+    right: 0;
+    background-color: #333;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+}
+
+.sidebar-content {
+    padding: 20px;
+    color: #ffffff;
+}
+
+.sidebar a {
+    color: #FFC107;
+    display: block;
+    margin: 10px 0;
+    font-size: 18px;
+    text-decoration: none;
+}
+
+.closebtn {
+    position: absolute;
+    top: 10px;
+    right: 25px;
+    font-size: 36px;
+    cursor: pointer;
+    color: #FFC107;
+}
+
+.form-group {
+    margin: 15px 0;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+/* Поля с ошибками */
+.form-group input.is-invalid {
+    border: 1px solid #ff4d4d; /* Красная рамка для ошибок */
+    background-color: rgba(255, 255, 255, 0.2); /* Немного более светлый фон для контраста */
+}
+
+.button {
+    color: #000;
+    background-color: #FFC107;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+.button:hover {
+    background-color: #FFB300;
+}
+
+footer {
+    background-color: #1F1D1D;
+    color: #FFC107;
+    text-align: center;
+    padding: 15px 0;
+    margin-top: auto;
+}
+
+/* Контейнер для карточек адресов */
+.address-cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px; /* расстояние между карточками */
+}
+
+.address-card {
+    flex: 1 1 calc(33.333% - 20px);
+    box-sizing: border-box;
+    margin-bottom: 15px;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.address-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+    .address-card {
+        flex: 1 1 calc(50% - 20px); /* Две карточки в ряд */
+    }
+}
+
+@media (max-width: 480px) {
+    .address-card {
+        flex: 1 1 100%; /* Одна карточка в ряд */
+    }
+}

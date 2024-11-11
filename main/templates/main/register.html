@@ -1,0 +1,28 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Регистрация - Luxe Lagoon{% endblock %}
+
+{% block content %}
+    <h2>Регистрация</h2>
+    <form method="post" action="{% url 'register' %}" style="max-width: 600px; margin: 0 auto;">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {% if field.errors %}
+                    {{ field|add_class:"is-invalid" }}
+                {% else %}
+                    {{ field }}
+                {% endif %}
+                {% for error in field.errors %}
+                    <div class="error-message">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="button" style="width: 100%;">Зарегистрироваться</button>
+    </form>
+{% endblock %}
