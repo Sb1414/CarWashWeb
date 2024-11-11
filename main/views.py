@@ -3,7 +3,7 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
-from .models import Service, Location
+from .models import Service, Location, Booking
 from .forms import RegistrationForm, BookingForm
 from django.contrib.auth import login
 from django.contrib.auth import authenticate, login, logout
@@ -45,12 +45,26 @@ def services(request):
 
 @login_required
 def book_service(request, service_id):
+    if not request.user.is_authenticated:
+        messages.error(request, 'Для заказа услуги необходимо войти в систему.')
+        return redirect('login')  # Перенаправление на страницу входа
+
     service = Service.objects.get(id=service_id)
     if request.method == "POST":
         form = BookingForm(request.POST)
         if form.is_valid():
-            # Здесь вы можете сохранить данные бронирования
+            # Сохранение заказа в базе данных
+            booking = Booking(
+                service=service,
+                user=request.user,
+                date=form.cleaned_data['date'],
+                time=form.cleaned_data['time']
+            )
+            booking.save()
+            messages.success(request, 'Услуга успешно заказана.')
             return redirect('services')
+        else:
+            messages.error(request, 'Ошибка при оформлении заказа. Попробуйте еще раз.')
     else:
         form = BookingForm()
     return render(request, 'main/book_service.html', {'service': service, 'form': form})

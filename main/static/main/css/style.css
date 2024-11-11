@@ -50,6 +50,13 @@ nav a.active, nav a:hover {
     box-sizing: border-box;
 }
 
+/* Стиль для карточек услуг */
+.services-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px; /* Расстояние между карточками */
+}
 
 /* Стиль для карточек услуг */
 .service-card {
@@ -58,7 +65,7 @@ nav a.active, nav a:hover {
     margin: 20px;
     padding: 20px;
     border-radius: 5px;
-    width: 45%;
+    width: 30%;
     display: inline-block;
     vertical-align: top;
     text-align: left;
