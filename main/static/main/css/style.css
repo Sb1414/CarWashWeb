@@ -1,10 +1,54 @@
-/* Основные стили */
 body {
     display: flex;
     flex-direction: column;
     font-family: Arial, sans-serif;
-    background-color: #2D2B2B;
+    background-image: url('../images/img.png'); /* Фоновое изображение */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    margin: 0;
+    padding: 0;
     color: #ffffff;
+    position: relative; /* Чтобы псевдоэлемент позиционировался относительно body */
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+}
+
+.content-section {
+    background-color: rgba(0, 0, 0, 0.6); /* полупрозрачный темный фон */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    max-width: 1200px; /* ограничиваем ширину контейнера */
+    width: 100%;
+    margin: 20px auto; /* центрируем секцию по горизонтали */
+    color: #ffffff;
+    box-sizing: border-box; /* для учета padding в общей ширине */
+}
+
+.services-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.service-card {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    flex: 1 1 calc(33.333% - 20px);
+    color: #FFC107;
 }
 
 html, body {
@@ -48,6 +92,8 @@ nav a.active, nav a:hover {
     width: 100%;
     margin: 0 auto;
     box-sizing: border-box;
+    background-color: rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 1);
 }
 
 /* Стиль для карточек услуг */
@@ -192,20 +238,27 @@ footer {
 /* Контейнер для карточек адресов */
 .address-cards-container {
     display: flex;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
     flex-wrap: wrap;
     justify-content: space-between;
-    gap: 20px; /* расстояние между карточками */
+    gap: 20px;
+    width: 100%;
 }
 
 .address-card {
-    flex: 1 1 calc(33.333% - 20px);
-    box-sizing: border-box;
-    margin-bottom: 15px;
+    background-color: rgba(255, 255, 255, 0.1);
     padding: 20px;
     border-radius: 8px;
-    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff; /* Белый цвет текста */
+    cursor: pointer;
+    text-align: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.address-card h3, .address-card p {
+    margin: 0;
+    color: #ffffff; /* Белый цвет для текста */
 }
 
 .address-card:hover {

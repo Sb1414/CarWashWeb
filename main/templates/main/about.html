@@ -1,11 +1,76 @@
 {% extends "main/base.html" %}
 
-{% block title %}О нас - Luxe Lagoon{% endblock %}
+{% block title %}Главная - Luxe Lagoon{% endblock %}
 
+{% load static %}
 {% block content %}
-    <h1>О нас</h1>
-    <p>Добро пожаловать в Luxe Lagoon — ваш идеальный оазис для автомобиля! Мы — команда профессионалов, которые заботятся о каждой детали вашего авто. Наша цель — предоставить услуги высокого качества, которые сделают вашу машину не только чистой, но и сияющей.</p>
-    <p>В Luxe Lagoon мы используем только экологически чистые моющие средства и современное оборудование, чтобы гарантировать безопасную и эффективную мойку. Мы предлагаем широкий спектр услуг: от стандартной мойки до детальной химчистки, полировки и защиты кузова.</p>
-    <p>Наша автомойка расположена в удобном месте, чтобы вы могли легко заехать к нам в любое время. Мы ценим ваше время и предлагаем быстрое и качественное обслуживание, чтобы вы могли снова наслаждаться поездками на своем автомобиле.</p>
-    <p>Присоединяйтесь к числу наших довольных клиентов и позвольте нам превратить заботу о вашем автомобиле в приятное и комфортное времяпрепровождение. Luxe Lagoon — это не просто мойка, это забота о вашем автомобиле!</p>
+    <div class="full-screen-background">
+        <div class="content-section">
+            <h1>Добро пожаловать в Luxe Lagoon</h1>
+            <p>Освежите свой автомобиль с помощью наших услуг авто детейлинга.</p>
+        </div>
+
+        <div class="content-section">
+            <h2>О компании</h2>
+            <p>Добро пожаловать в Luxe Lagoon — ваш идеальный оазис для автомобиля! Мы — команда профессионалов, которые заботятся о каждой детали вашего авто. Наша цель — предоставить услуги высокого качества, которые сделают вашу машину не только чистой, но и сияющей.</p>
+            <p>В Luxe Lagoon мы используем только экологически чистые моющие средства и современное оборудование, чтобы гарантировать безопасную и эффективную мойку. Мы предлагаем широкий спектр услуг: от стандартной мойки до детальной химчистки, полировки и защиты кузова.</p>
+            <p>Наша автомойка расположена в удобном месте, чтобы вы могли легко заехать к нам в любое время. Мы ценим ваше время и предлагаем быстрое и качественное обслуживание, чтобы вы могли снова наслаждаться поездками на своем автомобиле.</p>
+            <p>Присоединяйтесь к числу наших довольных клиентов и позвольте нам превратить заботу о вашем автомобиле в приятное и комфортное времяпрепровождение. Luxe Lagoon — это не просто мойка, это забота о вашем автомобиле!</p>
+        </div>
+
+        <div class="content-section">
+            <h2>Наши Услуги</h2>
+            <div class="services-container">
+            {% for service in services %}
+                <div class="service-card">
+                    {% if service.image %}
+                        <img src="{{ service.image.url }}" alt="{{ service.name }}" class="service-image">
+                    {% else %}
+                        <img src="{% static 'main/images/service_image_placeholder.png' %}" alt="{{ service.name }}" class="service-image">
+                    {% endif %}
+                    <h2>{{ service.name }}</h2>
+                    <p>{{ service.description }}</p>
+                    <p>Цена: {{ service.price }} руб.</p>
+                    <a href="{% url 'book_service' service.id %}" class="order-button">Заказать...</a>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+
+         <div class="content-section">
+            <h2>Контакты</h2>
+            <div id="map" style="height: 500px; width: 100%; margin-bottom: 20px;"></div>
+            <div class="address-cards-container">
+                {% for location in locations %}
+                    <div class="address-card" onclick="openYandexMaps({{ location.latitude }}, {{ location.longitude }})">
+                        <h3>{{ location.city }}</h3>
+                        <p>{{ location.address }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+            <p>Телефон: +7 (987) 172-20-10</p>
+            <p>Email: LuxeLagoon@mail.ru</p>
+        </div>
+
+        <script id="locations-data" type="application/json">
+            {{ locations_data|safe }}
+        </script>
+    </div>
 {% endblock %}
+
+{% block extra_css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin="" />
+
+{% endblock %}
+
+{% block extra_js %}
+    {{ block.super }}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <script src="{% static 'main/js/map.js' %}"></script>
+{% endblock %}
+

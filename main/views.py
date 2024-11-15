@@ -21,7 +21,18 @@ def home(request):
     return render(request, 'main/home.html', {'form': form})
 
 def about(request):
-    return render(request, 'main/about.html')
+    services = Service.objects.all()
+    locations = Location.objects.all()
+    locations_data = json.dumps([
+        {
+            'city': location.city,
+            'address': location.address,
+            'latitude': float(location.latitude),
+            'longitude': float(location.longitude)
+        }
+        for location in locations
+    ])
+    return render(request, 'main/about.html', {'services': services, 'locations': locations, 'locations_data': locations_data})
 
 
 

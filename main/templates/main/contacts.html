@@ -28,9 +28,9 @@
         <div id="map"></div> <!-- Контейнер для карты -->
 
         <!-- Контейнер для карточек адресов -->
-        <div class="address-cards-container">
+         <div class="address-cards-container">
             {% for location in locations %}
-                <div class="address-card">
+                <div class="address-card" onclick="openYandexMaps({{ location.latitude }}, {{ location.longitude }})">
                     <h3>{{ location.city }}</h3>
                     <p>{{ location.address }}</p>
                 </div>
@@ -44,6 +44,10 @@
         <p>Телефон: +7 (987) 172-20-10</p>
         <p>Email: LuxeLagoon@mail.ru</p>
     </div>
+
+    <script id="locations-data" type="application/json">
+        {{ locations_data|safe }}
+    </script>
 {% endblock %}
 
 {% block extra_js %}
@@ -52,39 +56,5 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
-    <script>
-        // Передача данных локаций в JavaScript
-        var locations = {{ locations_data|safe }};
-
-        document.addEventListener('DOMContentLoaded', function () {
-            // Инициализация карты с центром на Москве
-            var map = L.map('map').setView([55.751244, 37.618423], 10);
-
-            // Добавление слоя карты (OpenStreetMap)
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
-            console.log("Карта инициализирована");
-
-            console.log(locations);
-
-            // Проверка и отображение маркеров
-            if (Array.isArray(locations) && locations.length > 0) {
-                var markers = [];
-
-                locations.forEach(function(location) {
-                    var marker = L.marker([location.latitude, location.longitude]).addTo(map);
-                    var popupContent = "<b>" + location.city + "</b><br/>" + location.address;
-                    marker.bindPopup(popupContent);
-                    markers.push(marker);
-                });
-
-                var group = new L.featureGroup(markers);
-                map.fitBounds(group.getBounds().pad(0.5));
-            } else {
-                console.warn("Нет доступных локаций для отображения на карте.");
-            }
-        });
-    </script>
+    <script src="{% static 'main/js/map.js' %}"></script>
 {% endblock %}
