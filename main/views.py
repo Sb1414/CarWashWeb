@@ -2,7 +2,7 @@ import json
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Service, Location, Booking
 from .forms import RegistrationForm, BookingForm
 from django.contrib.auth import login
@@ -56,11 +56,8 @@ def services(request):
 
 @login_required
 def book_service(request, service_id):
-    if not request.user.is_authenticated:
-        messages.error(request, 'Для заказа услуги необходимо войти в систему.')
-        return redirect('login')  # Перенаправление на страницу входа
-
     service = Service.objects.get(id=service_id)
+
     if request.method == "POST":
         form = BookingForm(request.POST)
         if form.is_valid():
@@ -72,12 +69,15 @@ def book_service(request, service_id):
                 time=form.cleaned_data['time']
             )
             booking.save()
-            messages.success(request, 'Услуга успешно заказана.')
-            return redirect('services')
+
+            messages.success(request, 'Ваша заявка успешно принята и находится на рассмотрении.')
+
+            return redirect('services')  # Замените на нужный URL
         else:
             messages.error(request, 'Ошибка при оформлении заказа. Попробуйте еще раз.')
     else:
         form = BookingForm()
+
     return render(request, 'main/book_service.html', {'service': service, 'form': form})
 
 
@@ -111,3 +111,39 @@ def logout_view(request):
     logout(request)
     messages.success(request, 'Вы успешно вышли из системы.')
     return redirect('home')
+
+
+@login_required
+def my_bookings(request):
+    bookings = Booking.objects.filter(user=request.user)
+    return render(request, 'main/my_bookings.html', {'bookings': bookings})
+
+
+@login_required
+def edit_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+
+    if request.method == "POST":
+        form = BookingForm(request.POST, instance=booking)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Заявка успешно обновлена.")
+            return redirect('my_bookings')
+        else:
+            messages.error(request, "Ошибка при обновлении заявки.")
+    else:
+        form = BookingForm(instance=booking)
+
+    return render(request, 'main/edit_booking.html', {'form': form, 'booking': booking})
+
+
+@login_required
+def delete_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+
+    if request.method == "POST":
+        booking.delete()
+        messages.success(request, "Заявка успешно удалена.")
+        return redirect('my_bookings')
+
+    return render(request, 'main/delete_booking_confirm.html', {'booking': booking})

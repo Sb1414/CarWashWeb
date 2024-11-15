@@ -1,39 +1,26 @@
 {% extends "main/base.html" %}
-{% load static %}
 
-{% block title %}Заказ услуги{% endblock %}
+{% load static %}
+{% block title %}Мои заявки{% endblock %}
 
 {% block content %}
-    {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-                <div class="message {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        </div>
-    {% endif %}
+    <h1>Редактирование заявки: {{ booking.service.name }}</h1>
+
     <form method="post">
         {% csrf_token %}
-        <h1>Заказ услуги: {{ service.name }}</h1>
-
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div class="message {{ message.tags }}">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
 
         <!-- Поле для выбора даты -->
         <label for="id_date">Дата:</label>
-        <input type="text" id="id_date" name="date" class="date-picker" placeholder="Выберите дату" required>
+        <input type="text" id="id_date" name="date" class="date-picker" value="{{ booking.date }}" placeholder="Выберите дату" required>
 
         <!-- Поле для выбора времени -->
         <label for="id_time">Время:</label>
-        <input type="text" id="id_time" name="time" class="time-picker" placeholder="Выберите время" required>
+        <input type="text" id="id_time" name="time" class="time-picker" value="{{ booking.time }}" placeholder="Выберите время" required>
 
-        <button type="submit">Оформить заказ</button>
+        <button type="submit">Сохранить изменения</button>
     </form>
 {% endblock %}
+
 
 {% block extra_css %}
     {{ block.super }}
@@ -51,6 +38,7 @@
                 dateFormat: "Y-m-d",
                 altInput: true,
                 altFormat: "F j, Y",
+                defaultDate: "{{ booking.date|date:'Y-m-d' }}", // установка текущей даты для редактирования
                 minDate: "today" // запрещаем выбор прошедших дат
             });
             flatpickr(".time-picker", {
@@ -58,9 +46,8 @@
                 noCalendar: true,
                 dateFormat: "H:i",
                 time_24hr: true,
+                defaultDate: "{{ booking.time|time:'H:i' }}" // установка текущего времени для редактирования
             });
         });
     </script>
 {% endblock %}
-
-

@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from .models import Booking
 
 
 class RegistrationForm(UserCreationForm):
@@ -13,6 +14,11 @@ class RegistrationForm(UserCreationForm):
         fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2')
 
 
-class BookingForm(forms.Form):
-    date = forms.DateField(widget=forms.SelectDateWidget)
-    time = forms.TimeField(widget=forms.TimeInput(format='%H:%M'))
+class BookingForm(forms.ModelForm):
+    class Meta:
+        model = Booking
+        fields = ['date', 'time']
+        widgets = {
+            'date': forms.SelectDateWidget,
+            'time': forms.TimeInput(format='%H:%M'),
+        }
