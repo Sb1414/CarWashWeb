@@ -4,6 +4,29 @@
 {% block content %}
 <div class="slots-page">
     <h1 class="page-title">Мои слоты</h1>
+    <div class="slot-form-container">
+        <form method="post" class="slot-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="date">Дата:</label>
+                <input type="date" id="date" name="date" required>
+            </div>
+            <div class="form-group">
+                <label for="time">Время:</label>
+                <input type="time" id="time" name="time" required>
+            </div>
+           <div class="form-group">
+                <label for="service">Услуга:</label>
+                <select id="service" name="service" class="styled-select" required>
+                    <option value="" disabled selected>Выберите услугу</option>
+                    {% for service in services %}
+                        <option value="{{ service.id }}">{{ service.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="button">Добавить слот</button>
+        </form>
+    </div>
 
     <h2 class="section-title">Список слотов</h2>
     <table class="slots-table">
@@ -13,6 +36,7 @@
                 <th>Время</th>
                 <th>Услуга</th>
                 <th>Статус</th>
+                <th>Действия</th>
             </tr>
         </thead>
         <tbody>
@@ -21,13 +45,16 @@
                     <td>{{ slot.date }}</td>
                     <td>{{ slot.time }}</td>
                     <td>{{ slot.service.name }}</td>
+                    <td>{{ slot.get_status_display }}</td>
                     <td>
-                        {% if slot.is_booked %}
-                            <button class="enable-camera-btn" data-slot-id="{{ slot.id }}">
-                                {% if slot.camera_active %}Отключить камеру{% else %}Включить камеру{% endif %}
-                            </button>
+                        {% if slot.status == "Забронирован" %}
+                            {% if slot.camera_active %}
+                                <button class="view-camera-btn" data-slot-id="{{ slot.id }}">Активировать камеру</button>
+                            {% else %}
+                                <button class="view-camera-btn" data-slot-id="{{ slot.id }}">Активировать камеру</button>
+                            {% endif %}
                         {% else %}
-                            Свободен
+                            <span>Нет действий</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -40,7 +67,6 @@
     </table>
 </div>
 
-<!-- Модальное окно для камеры -->
 <div id="cameraModal" class="modal">
     <div class="modal-content">
         <span class="close-modal">&times;</span>
@@ -48,86 +74,82 @@
         <div id="camera-stream">
             <video autoplay></video>
         </div>
+        <button id="completeServiceButton" class="button">Завершить выполнение услуги</button>
     </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const cameraBtns = document.querySelectorAll('.enable-camera-btn');
-        const modal = document.getElementById('cameraModal');
-        const closeModal = document.querySelector('.close-modal');
-        const videoElement = document.querySelector('#camera-stream video');
-        let mediaStream = null;
+    document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("cameraModal");
+    const closeModal = document.querySelector(".close-modal");
+    const videoElement = document.querySelector("#camera-stream video");
 
-        cameraBtns.forEach(btn => {
-            btn.addEventListener('click', function () {
-                const slotId = this.dataset.slotId;
-                const button = this;
+    document.querySelectorAll(".view-camera-btn").forEach((button) => {
+        button.addEventListener("click", () => {
+            const slotId = button.dataset.slotId;
 
-                fetch(`/toggle_camera/${slotId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
+            fetch(`/toggle_camera/${slotId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/json",
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success && data.camera_active) {
+                        modal.style.display = "block";
+
+                        // Подключение камеры через WebRTC
+                        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                            navigator.mediaDevices
+                                .getUserMedia({ video: true })
+                                .then((stream) => {
+                                    videoElement.srcObject = stream;
+                                    videoElement.play();
+                                })
+                                .catch((err) => {
+                                    console.error("Ошибка при подключении к камере:", err);
+                                    alert("Не удалось подключиться к камере.");
+                                });
+                        } else {
+                            alert("Камера не поддерживается в этом браузере.");
+                        }
+                    } else if (!data.camera_active) {
+                        alert("Камера была отключена.");
+                    } else {
+                        alert("Не удалось изменить состояние камеры.");
                     }
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.camera_active) {
-                            button.textContent = 'Отключить камеру';
-                            // Включение камеры
-                            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                                navigator.mediaDevices.getUserMedia({ video: true })
-                                    .then(stream => {
-                                        mediaStream = stream;
-                                        videoElement.srcObject = stream;
-                                        modal.style.display = 'block';
-                                    })
-                                    .catch(err => {
-                                        alert('Ошибка при подключении к камере: ' + err.message);
-                                    });
-                            } else {
-                                alert('Ваш браузер не поддерживает доступ к камере.');
-                            }
-                        } else {
-                            button.textContent = 'Включить камеру';
-                            // Отключение камеры
-                            if (mediaStream) {
-                                const tracks = mediaStream.getTracks();
-                                tracks.forEach(track => track.stop());
-                                mediaStream = null;
-                            }
-                            modal.style.display = 'none';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Ошибка:', error);
-                        alert('Ошибка при изменении состояния камеры.');
-                    });
-            });
-        });
-
-        closeModal.addEventListener('click', () => {
-            modal.style.display = 'none';
-            if (mediaStream) {
-                const tracks = mediaStream.getTracks();
-                tracks.forEach(track => track.stop());
-                mediaStream = null;
-            }
-        });
-
-        window.addEventListener('click', event => {
-            if (event.target === modal) {
-                modal.style.display = 'none';
-                if (mediaStream) {
-                    const tracks = mediaStream.getTracks();
-                    tracks.forEach(track => track.stop());
-                    mediaStream = null;
-                }
-            }
+                .catch((error) => console.error("Ошибка:", error));
         });
     });
-</script>
 
+    // Закрытие модального окна
+    closeModal.addEventListener("click", () => {
+        modal.style.display = "none";
+        const stream = videoElement.srcObject;
+        if (stream) {
+            const tracks = stream.getTracks();
+            tracks.forEach((track) => track.stop());
+        }
+        videoElement.srcObject = null;
+    });
+
+    window.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            modal.style.display = "none";
+            const stream = videoElement.srcObject;
+            if (stream) {
+                const tracks = stream.getTracks();
+                tracks.forEach((track) => track.stop());
+            }
+            videoElement.srcObject = null;
+        }
+    });
+});
+
+</script>
 <style>
     .modal {
         display: none;

@@ -63,6 +63,7 @@ def book_service(request, service_id):
                     slot=slot
                 )
                 slot.is_booked = True
+                slot.status = 'Забронирован'
                 slot.save()
                 messages.success(request, "Вы успешно записались на услугу!")
                 return redirect('my_bookings')
@@ -215,6 +216,20 @@ def toggle_camera(request, slot_id):
     slot.camera_active = not slot.camera_active
     slot.save()
     return JsonResponse({'success': True, 'camera_active': slot.camera_active})
+
+from django.http import JsonResponse
+
+@login_required
+def complete_service(request, slot_id):
+    slot = get_object_or_404(Slot, id=slot_id, specialist__user=request.user)
+
+    if request.method == "POST":
+        slot.status = 'Завершен'
+        slot.camera_active = False
+        slot.save()
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'success': False, 'error': 'Неверный запрос.'})
 
 
 

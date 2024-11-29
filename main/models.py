@@ -38,9 +38,15 @@ class Slot(models.Model):
     time = models.TimeField()
     is_booked = models.BooleanField(default=False)
     camera_active = models.BooleanField(default=False)
+    status = models.CharField(max_length=20, choices=[
+        ('Свободен', 'Свободен'),
+        ('Забронирован', 'Забронирован'),
+        ('Завершен', 'Завершен'),
+    ], default='Свободен')
 
     def __str__(self):
-        return f"{self.date} {self.time} ({'Забронирован' if self.is_booked else 'Свободен'})"
+        return f"{self.date} {self.time} ({self.get_status_display()})"
+
 
 class Booking(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE)

@@ -13,6 +13,7 @@
                 <th>Дата</th>
                 <th>Время</th>
                 <th>Действия</th>
+                <th>Камера</th>
             </tr>
         </thead>
         <tbody>
@@ -21,11 +22,15 @@
                     <td>{{ booking.service.name }}</td>
                     <td>{{ booking.date }}</td>
                     <td>{{ booking.time }}</td>
+                    <td class="actions">
+                        <a href="{% url 'payment_redirect' booking.id %}" class="small-button pay-btn">Оплатить</a>
+                        <a href="{% url 'delete_booking' booking.id %}" class="small-button delete-btn">Удалить</a>
+                    </td>
                     <td>
                         {% if booking.slot and booking.slot.camera_active %}
-                            <button class="view-camera-btn" data-slot-id="{{ booking.slot.id }}">Смотреть камеру</button>
+                            <button class="small-button view-camera-btn" data-slot-id="{{ booking.slot.id }}">Смотреть камеру</button>
                         {% else %}
-                            Ожидайте подключения камеры
+                            <span>Ожидайте подключения камеры</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -69,6 +74,72 @@
 
 
 <style>
+/* Таблица */
+.table-container {
+    margin: 20px auto;
+    max-width: 800px;
+}
+
+table {
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+table th, table td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.actions {
+    white-space: nowrap;
+    gap: 8px; /* Расстояние между кнопками */
+    justify-content: center;
+}
+
+/* Маленькие кнопки */
+.small-button {
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    text-decoration: none;
+}
+
+/* Цвета кнопок */
+.pay-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+.pay-btn:hover {
+    background-color: #0056b3;
+}
+
+.delete-btn {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+.delete-btn:hover {
+    background-color: #cc0000;
+}
+
+.view-camera-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.view-camera-btn:hover {
+    background-color: #1e7e34;
+}
+
+/* Модальное окно */
 .modal {
     display: none;
     position: fixed;
