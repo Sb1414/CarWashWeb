@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Booking
+from .models import Booking, Specialist
 
 
 class RegistrationForm(UserCreationForm):
@@ -22,3 +22,8 @@ class BookingForm(forms.ModelForm):
             'date': forms.SelectDateWidget,
             'time': forms.TimeInput(format='%H:%M'),
         }
+
+class SpecialistForm(forms.ModelForm):
+    class Meta:
+        model = Specialist
+        fields = ['name', 'bio', 'photo']

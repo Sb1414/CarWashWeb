@@ -1,0 +1,12 @@
+{% extends "main/base.html" %}
+{% block title %}Оплата услуги{% endblock %}
+{% block content %}
+<div class="payment-page">
+    <h1>Оплата услуги: {{ booking.service.name }}</h1>
+    <p>Сумма: {{ booking.service.price }} руб.</p>
+    <p>
+        Нажмите на кнопку ниже, чтобы перейти к оплате через СБП:
+    </p>
+    <a href="{{ sbp_url }}" class="button" target="_blank">Перейти к оплате</a>
+</div>
+{% endblock %}

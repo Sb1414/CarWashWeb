@@ -59,23 +59,60 @@ p {
 .services-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 20px; /* Расстояние между карточками */
+    justify-content: space-between;
 }
 
 .service-card {
-    background-color: rgba(0, 0, 0, 0.8);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex: 1 1 calc(33.333% - 20px); /* Ширина карточки: треть строки */
+    box-sizing: border-box;
+    border: 1px solid #ccc; /* Для наглядности */
+    padding: 10px;
+    text-align: center;
 }
 
-.service-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8);
+@media (max-width: 768px) {
+    .service-card {
+        flex: 1 1 calc(50% - 20px); /* Две карточки в ряд на меньших экранах */
+    }
+}
+
+@media (max-width: 480px) {
+    .service-card {
+        flex: 1 1 100%; /* Одна карточка в ряд на маленьких экранах */
+    }
+}
+
+.specialist-card {
+    width: 100%; /* Карточка растягивается по ширине родителя */
+    box-sizing: border-box;
+}
+
+.specialists-container {
+    width: 100%;
+    max-width: 1200px; /* Не слишком узкий */
+    margin: 0 auto; /* Центрирование */
+    box-sizing: border-box;
+}
+
+.service-card img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
+
+.order-button {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.order-button:hover {
+    background-color: #0056b3;
 }
 
 html, body {

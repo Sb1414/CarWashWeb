@@ -22,7 +22,7 @@
                         <td>{{ booking.date }}</td>
                         <td>{{ booking.time }}</td>
                         <td>
-                            <a href="{% url 'edit_booking' booking.id %}">Редактировать</a> |
+                            <a href="{% url 'payment_redirect' booking.id %}" class="button">Оплатить</a> |
                             <a href="{% url 'delete_booking' booking.id %}" style="color: #FF4D4D;">Удалить</a>
                         </td>
                     </tr>

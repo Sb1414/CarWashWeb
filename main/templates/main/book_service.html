@@ -1,38 +1,25 @@
 {% extends "main/base.html" %}
 {% load static %}
-
-{% block title %}Заказ услуги{% endblock %}
-
+{% block title %}Запись на услугу{% endblock %}
 {% block content %}
-    {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-                <div class="message {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        </div>
-    {% endif %}
+<div class="booking-page">
+    <h1>Запись на услугу: {{ service.name }}</h1>
+
     <form method="post">
         {% csrf_token %}
-        <h1>Заказ услуги: {{ service.name }}</h1>
-
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div class="message {{ message.tags }}">{{ message }}</div>
+        {% if slots %}
+            <label for="slot">Выберите слот:</label>
+            <select id="slot" name="slot" required>
+                {% for slot in slots %}
+                    <option value="{{ slot.id }}">{{ slot.date }} {{ slot.time }}</option>
                 {% endfor %}
-            </div>
+            </select>
+            <button type="submit" class="button">Записаться</button>
+        {% else %}
+            <p>На данную услугу пока нет свободных слотов.</p>
         {% endif %}
-
-        <!-- Поле для выбора даты -->
-        <label for="id_date">Дата:</label>
-        <input type="text" id="id_date" name="date" class="date-picker" placeholder="Выберите дату" required>
-
-        <!-- Поле для выбора времени -->
-        <label for="id_time">Время:</label>
-        <input type="text" id="id_time" name="time" class="time-picker" placeholder="Выберите время" required>
-
-        <button type="submit">Оформить заказ</button>
     </form>
+</div>
 {% endblock %}
 
 {% block extra_css %}
