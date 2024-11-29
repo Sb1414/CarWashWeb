@@ -4,7 +4,7 @@
 
 {% load static %}
 {% block content %}
-    <div class="full-screen-background">
+    <div class="main-page full-screen-background">
         <div class="content-section" data-aos="fade-up">
             <h1>Добро пожаловать в Luxe Lagoon</h1>
             <p>Освежите свой автомобиль с помощью наших услуг авто детейлинга.</p>
@@ -18,11 +18,11 @@
             <p>Присоединяйтесь к числу наших довольных клиентов и позвольте нам превратить заботу о вашем автомобиле в приятное и комфортное времяпрепровождение. Luxe Lagoon — это не просто мойка, это забота о вашем автомобиле!</p>
         </div>
 
-        <div class="content-section" data-aos="fade-up">
+         <div class="content-section" data-aos="fade-up">
             <h2>Наши Услуги</h2>
             <div class="services-container">
-            {% for service in services %}
-                <div class="service-card"  data-aos="zoom-in">
+            {% for service in services|slice:":4" %}  <!-- Ограничиваем до 4 услуг -->
+                <div class="service-card" data-aos="zoom-in">
                     {% if service.image %}
                         <img src="{{ service.image.url }}" alt="{{ service.name }}" class="service-image">
                     {% else %}

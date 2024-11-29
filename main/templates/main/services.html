@@ -2,20 +2,22 @@
 {% load static %}
 {% block title %}Услуги - Luxe Lagoon{% endblock %}
 {% block content %}
-    <h1>Наши услуги</h1>
-    <div class="services-container">
-        {% for service in services %}
-            <div class="service-card">
-                {% if service.image %}
-                    <img src="{{ service.image.url }}" alt="{{ service.name }}" class="service-image">
-                {% else %}
-                    <img src="{% static 'main/images/service_image_placeholder.png' %}" alt="{{ service.name }}" class="service-image">
-                {% endif %}
-                <h2>{{ service.name }}</h2>
-                <p>{{ service.description }}</p>
-                <p>Цена: {{ service.price }} руб.</p>
-                <a href="{% url 'book_service' service.id %}" class="order-button">Заказать...</a>
-            </div>
-        {% endfor %}
+    <div class="services-page">
+        <h1>Наши услуги</h1>
+        <div class="services-container">
+            {% for service in services %}
+                <div class="service-card">
+                    {% if service.image %}
+                        <img src="{{ service.image.url }}" alt="{{ service.name }}" class="service-image">
+                    {% else %}
+                        <img src="{% static 'main/images/service_image_placeholder.png' %}" alt="{{ service.name }}" class="service-image">
+                    {% endif %}
+                    <h2>{{ service.name }}</h2>
+                    <p>{{ service.description }}</p>
+                    <p>Цена: {{ service.price }} руб.</p>
+                    <a href="{% url 'book_service' service.id %}" class="order-button">Заказать...</a>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}
