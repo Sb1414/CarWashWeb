@@ -1,32 +1,17 @@
 {% extends "main/base.html" %}
-{% block title %}Мои слоты - Luxe Lagoon{% endblock %}
+{% block title %}Мои слоты{% endblock %}
+
 {% block content %}
 <div class="slots-page">
     <h1 class="page-title">Мои слоты</h1>
 
-    <!-- форма добавления слота -->
-    <div class="slot-form-container">
-        <form method="post" class="slot-form">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="date">Дата:</label>
-                <input type="date" id="date" name="date" required>
-            </div>
-            <div class="form-group">
-                <label for="time">Время:</label>
-                <input type="time" id="time" name="time" required>
-            </div>
-            <button type="submit" class="button">Добавить слот</button>
-        </form>
-    </div>
-
-    <!-- таблица для отображения слотов -->
     <h2 class="section-title">Список слотов</h2>
     <table class="slots-table">
         <thead>
             <tr>
                 <th>Дата</th>
                 <th>Время</th>
+                <th>Услуга</th>
                 <th>Статус</th>
             </tr>
         </thead>
@@ -35,122 +20,155 @@
                 <tr>
                     <td>{{ slot.date }}</td>
                     <td>{{ slot.time }}</td>
-                    <td class="{% if slot.is_booked %}booked{% else %}available{% endif %}">
-                        {% if slot.is_booked %}Забронирован{% else %}Свободен{% endif %}
+                    <td>{{ slot.service.name }}</td>
+                    <td>
+                        {% if slot.is_booked %}
+                            <button class="enable-camera-btn" data-slot-id="{{ slot.id }}">
+                                {% if slot.camera_active %}Отключить камеру{% else %}Включить камеру{% endif %}
+                            </button>
+                        {% else %}
+                            Свободен
+                        {% endif %}
                     </td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="3" class="no-slots">Слотов пока нет.</td>
+                    <td colspan="4" class="no-slots">Слотов пока нет.</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-{% endblock %}
+
+<!-- Модальное окно для камеры -->
+<div id="cameraModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Камера</h2>
+        <div id="camera-stream">
+            <video autoplay></video>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const cameraBtns = document.querySelectorAll('.enable-camera-btn');
+        const modal = document.getElementById('cameraModal');
+        const closeModal = document.querySelector('.close-modal');
+        const videoElement = document.querySelector('#camera-stream video');
+        let mediaStream = null;
+
+        cameraBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const slotId = this.dataset.slotId;
+                const button = this;
+
+                fetch(`/toggle_camera/${slotId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.camera_active) {
+                            button.textContent = 'Отключить камеру';
+                            // Включение камеры
+                            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                                navigator.mediaDevices.getUserMedia({ video: true })
+                                    .then(stream => {
+                                        mediaStream = stream;
+                                        videoElement.srcObject = stream;
+                                        modal.style.display = 'block';
+                                    })
+                                    .catch(err => {
+                                        alert('Ошибка при подключении к камере: ' + err.message);
+                                    });
+                            } else {
+                                alert('Ваш браузер не поддерживает доступ к камере.');
+                            }
+                        } else {
+                            button.textContent = 'Включить камеру';
+                            // Отключение камеры
+                            if (mediaStream) {
+                                const tracks = mediaStream.getTracks();
+                                tracks.forEach(track => track.stop());
+                                mediaStream = null;
+                            }
+                            modal.style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка:', error);
+                        alert('Ошибка при изменении состояния камеры.');
+                    });
+            });
+        });
+
+        closeModal.addEventListener('click', () => {
+            modal.style.display = 'none';
+            if (mediaStream) {
+                const tracks = mediaStream.getTracks();
+                tracks.forEach(track => track.stop());
+                mediaStream = null;
+            }
+        });
+
+        window.addEventListener('click', event => {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+                if (mediaStream) {
+                    const tracks = mediaStream.getTracks();
+                    tracks.forEach(track => track.stop());
+                    mediaStream = null;
+                }
+            }
+        });
+    });
+</script>
 
 <style>
-.slots-page {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.7);
+    }
 
-.page-title {
-    text-align: center;
-    font-size: 2rem;
-    margin-bottom: 20px;
-    color: #333;
-}
+    .modal-content {
+        background-color: #fff;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 60%;
+        text-align: center;
+    }
 
-/* Компактная форма */
-.slot-form-container {
-    margin-bottom: 30px;
-    padding: 10px 15px;
-    background-color: rgba(0, 0, 0, 0.05);
-    border-radius: 8px;
-    width: 400px; /* Уменьшенная ширина */
-    margin: 0 auto; /* Центрирование формы */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
+    .close-modal {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
 
-.slot-form .form-group {
-    margin-bottom: 15px;
-}
+    .close-modal:hover,
+    .close-modal:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
 
-.slot-form label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #333;
-}
-
-.slot-form input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-    box-sizing: border-box;
-}
-
-.slot-form .button {
-    background-color: #007bff;
-    color: #fff;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-}
-
-.slot-form .button:hover {
-    background-color: #0056b3;
-}
-
-/* Таблица для отображения слотов */
-.slots-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.slots-table th, .slots-table td {
-    padding: 10px;
-    text-align: center;
-    border: 1px solid #ddd;
-}
-
-.slots-table th {
-    background-color: #007bff;
-    color: #fff;
-    font-weight: bold;
-}
-
-.slots-table td {
-    background-color: #f9f9f9;
-}
-
-.slots-table .available {
-    color: #4caf50;
-    font-weight: bold;
-}
-
-.slots-table .booked {
-    color: #f44336;
-    font-weight: bold;
-}
-
-.no-slots {
-    text-align: center;
-    color: #777;
-    font-size: 1.2rem;
-    padding: 10px;
-}
+    #camera-stream video {
+        width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
 </style>
+{% endblock %}

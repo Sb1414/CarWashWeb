@@ -4,35 +4,104 @@
 {% block title %}Мои заявки{% endblock %}
 
 {% block content %}
-    <div class="table-container">
-        <h2 class="table-title">Мои заявки</h2>
-        <table>
-            <thead>
+<div class="table-container">
+    <h2 class="table-title">Мои заявки</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Услуга</th>
+                <th>Дата</th>
+                <th>Время</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
                 <tr>
-                    <th>Услуга</th>
-                    <th>Дата</th>
-                    <th>Время</th>
-                    <th>Действия</th>
+                    <td>{{ booking.service.name }}</td>
+                    <td>{{ booking.date }}</td>
+                    <td>{{ booking.time }}</td>
+                    <td>
+                        {% if booking.slot and booking.slot.camera_active %}
+                            <button class="view-camera-btn" data-slot-id="{{ booking.slot.id }}">Смотреть камеру</button>
+                        {% else %}
+                            Ожидайте подключения камеры
+                        {% endif %}
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                {% for booking in bookings %}
-                    <tr>
-                        <td>{{ booking.service.name }}</td>
-                        <td>{{ booking.date }}</td>
-                        <td>{{ booking.time }}</td>
-                        <td>
-                            <a href="{% url 'payment_redirect' booking.id %}" class="button">Оплатить</a> |
-                            <a href="{% url 'delete_booking' booking.id %}" style="color: #FF4D4D;">Удалить</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-{% endblock %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
-{% block extra_css %}
-    {{ block.super }}
-    <link rel="stylesheet" href="{% static 'main/css/booking.css' %}">
+<!-- Модальное окно -->
+<div id="cameraModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Просмотр камеры</h2>
+        <div id="camera-placeholder" style="background-color: black; width: 100%; height: 300px;"></div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const modal = document.getElementById("cameraModal");
+        const closeModal = document.querySelector(".close-modal");
+        const cameraButtons = document.querySelectorAll(".view-camera-btn");
+
+        cameraButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                modal.style.display = "block";
+            });
+        });
+
+        closeModal.addEventListener("click", () => {
+            modal.style.display = "none";
+        });
+
+        window.onclick = (event) => {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        };
+    });
+</script>
+
+
+<style>
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 60%;
+    text-align: center;
+}
+
+.close-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#camera-placeholder {
+    width: 100%;
+    height: 300px;
+    border-radius: 8px;
+}
+</style>
 {% endblock %}
