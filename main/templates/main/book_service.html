@@ -7,17 +7,15 @@
 
     <form method="post">
         {% csrf_token %}
-        {% if slots %}
-            <label for="slot">Выберите слот:</label>
-            <select id="slot" name="slot" required>
-                {% for slot in slots %}
-                    <option value="{{ slot.id }}">{{ slot.date }} {{ slot.time }}</option>
-                {% endfor %}
-            </select>
-            <button type="submit" class="button">Записаться</button>
-        {% else %}
-            <p>На данную услугу пока нет свободных слотов.</p>
-        {% endif %}
+        <label for="date">Выберите дату:</label>
+        <input type="text" id="date" name="date" class="date-picker" required>
+
+        <label for="time">Выберите время:</label>
+        <select id="time" name="time" class="time-picker" required>
+            <!-- Временные слоты будут добавлены через JavaScript -->
+        </select>
+
+        <button type="submit" class="button">Записаться</button>
     </form>
 </div>
 {% endblock %}
@@ -32,22 +30,27 @@
     {{ block.super }}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        // Инициализация Flatpickr для выбора даты и времени
         document.addEventListener("DOMContentLoaded", function() {
             flatpickr(".date-picker", {
                 dateFormat: "Y-m-d",
                 altInput: true,
                 altFormat: "F j, Y",
-                minDate: "today" // запрещаем выбор прошедших дат
-            });
-            flatpickr(".time-picker", {
-                enableTime: true,
-                noCalendar: true,
-                dateFormat: "H:i",
-                time_24hr: true,
+                minDate: "today",
+                onChange: function(selectedDates, dateStr, instance) {
+                    fetch(`/api/get_available_times/?date=${dateStr}&specialist_id={{ service.specialist.id }}&service_id={{ service.id }}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const timePicker = document.getElementById("time");
+                            timePicker.innerHTML = "";
+                            data.available_times.forEach(time => {
+                                const option = document.createElement("option");
+                                option.value = time;
+                                option.textContent = time;
+                                timePicker.appendChild(option);
+                            });
+                        });
+                }
             });
         });
     </script>
 {% endblock %}
-
-

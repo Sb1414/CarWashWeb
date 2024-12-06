@@ -48,31 +48,41 @@ def services(request):
 @login_required
 def book_service(request, service_id):
     service = get_object_or_404(Service, id=service_id)
-    slots = Slot.objects.filter(service=service, is_booked=False).order_by('date', 'time')
+    if request.method == 'POST':
+        date = request.POST.get('date')
+        time = request.POST.get('time')
+        user = request.user
 
-    if request.method == "POST":
-        slot_id = request.POST.get('slot')
-        if slot_id:
-            slot = Slot.objects.get(id=slot_id)
-            if not slot.is_booked:
-                Booking.objects.create(
-                    service=service,
-                    user=request.user,
-                    date=slot.date,
-                    time=slot.time,
-                    slot=slot
-                )
-                slot.is_booked = True
-                slot.status = 'Забронирован'
-                slot.save()
-                messages.success(request, "Вы успешно записались на услугу!")
-                return redirect('my_bookings')
-            else:
-                messages.error(request, "Этот слот уже забронирован. Пожалуйста, выберите другой.")
-        else:
-            messages.error(request, "Выберите слот для записи.")
+        # Create or get the slot
+        slot, created = Slot.objects.get_or_create(
+            specialist=service.specialist,
+            date=date,
+            time=time,
+            defaults={'service': service, 'status': 'Забронирован'}
+        )
 
-    return render(request, 'main/book_service.html', {'service': service, 'slots': slots})
+        # Create the booking
+        booking = Booking.objects.create(
+            service=service,
+            user=user,
+            date=date,
+            time=time,
+            slot=slot
+        )
+
+        messages.success(request, 'Запись успешно создана.')
+        return redirect('my_bookings')
+
+    return render(request, 'main/book_service.html', {'service': service})
+
+def get_available_times(request):
+    date = request.GET.get('date')
+    specialist_id = request.GET.get('specialist_id')
+    slots = Slot.objects.filter(specialist_id=specialist_id, date=date, status='Забронирован')
+    booked_times = [slot.time.strftime('%H:%M') for slot in slots]
+    all_times = [f"{hour:02d}:00" for hour in range(9, 18)]
+    available_times = [time for time in all_times if time not in booked_times]
+    return JsonResponse({'available_times': available_times})
 
 
 def register_view(request):
@@ -136,8 +146,12 @@ def delete_booking(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
 
     if request.method == "POST":
+        slot = booking.slot
         booking.delete()
         messages.success(request, "Заявка успешно удалена.")
+        if slot:
+            slot.delete()
+        messages.success(request, "Заявка и связанный слот успешно удалены.")
         return redirect('my_bookings')
 
     return render(request, 'main/delete_booking_confirm.html', {'booking': booking})

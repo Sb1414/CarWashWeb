@@ -55,6 +55,16 @@ class Booking(models.Model):
     time = models.TimeField()
     slot = models.ForeignKey(Slot, on_delete=models.SET_NULL, null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        if not self.slot:
+            self.slot, created = Slot.objects.get_or_create(
+                specialist=self.service.specialist,
+                date=self.date,
+                time=self.time,
+                defaults={'status': 'Забронирован'}
+            )
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Заказ {self.service.name} от {self.user.username}"
 
