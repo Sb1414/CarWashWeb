@@ -50,6 +50,8 @@ def book_service(request, service_id):
     service = get_object_or_404(Service, id=service_id)
     slots = Slot.objects.filter(service=service, is_booked=False).order_by('date', 'time')
 
+    hours = range(9, 18)  # Диапазон часов для выбора времени
+
     if request.method == "POST":
         slot_id = request.POST.get('slot')
         if slot_id:
@@ -72,7 +74,7 @@ def book_service(request, service_id):
         else:
             messages.error(request, "Выберите слот для записи.")
 
-    return render(request, 'main/book_service.html', {'service': service, 'slots': slots})
+    return render(request, 'main/book_service.html', {'service': service, 'slots': slots, 'hours': hours})
 
 
 def register_view(request):
@@ -237,3 +239,13 @@ def complete_service(request, slot_id):
 def check_camera_status(request, slot_id):
     slot = get_object_or_404(Slot, id=slot_id)
     return JsonResponse({'camera_active': slot.camera_active})
+
+def get_available_slots(request):
+    service_id = request.GET.get("service_id")
+    date = request.GET.get("date")
+    slots = Slot.objects.filter(service_id=service_id, date=date)
+
+    available_slots = [
+        slot.time.strftime("%H:%M") for slot in slots if not slot.is_booked
+    ]
+    return JsonResponse({"available_slots": available_slots})

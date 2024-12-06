@@ -17,4 +17,5 @@ urlpatterns = [
     path('activate_camera/<int:slot_id>/', views.activate_camera, name='activate_camera'),
     path('toggle_camera/<int:slot_id>/', views.toggle_camera, name='toggle_camera'),
     path('complete_service/<int:slot_id>/', views.complete_service, name='complete_service'),
+    path('get-available-slots/', views.get_available_slots, name='get_available_slots'),
 ]

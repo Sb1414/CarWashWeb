@@ -58,4 +58,3 @@ class Booking(models.Model):
     def __str__(self):
         return f"Заказ {self.service.name} от {self.user.username}"
 
-

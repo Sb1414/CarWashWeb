@@ -5,19 +5,32 @@
 <div class="booking-page">
     <h1>Запись на услугу: {{ service.name }}</h1>
 
-    <form method="post">
+    <form method="post" id="bookingForm">
         {% csrf_token %}
-        {% if slots %}
-            <label for="slot">Выберите слот:</label>
-            <select id="slot" name="slot" required>
-                {% for slot in slots %}
-                    <option value="{{ slot.id }}">{{ slot.date }} {{ slot.time }}</option>
-                {% endfor %}
-            </select>
-            <button type="submit" class="button">Записаться</button>
-        {% else %}
-            <p>На данную услугу пока нет свободных слотов.</p>
-        {% endif %}
+        <div>
+            <label for="date">Выберите дату:</label>
+            <input type="text" id="datePicker" class="date-picker" name="date" required>
+        </div>
+
+        <div id="timeTableWrapper" style="display: none; margin-top: 20px;">
+            <h2>Выберите время:</h2>
+            <table id="timeTable">
+                <thead>
+                    <tr>
+                        <th>Время</th>
+                    </tr>
+                </thead>
+               <tbody>
+                    {% for hour in hours %}
+                        <tr data-time="{{ hour }}:00">
+                            <td>{{ hour }}:00</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <input type="hidden" name="slot" id="selectedSlot">
+        <button type="submit" id="submitButton" class="button" disabled>Записаться</button>
     </form>
 </div>
 {% endblock %}
@@ -25,29 +38,89 @@
 {% block extra_css %}
     {{ block.super }}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="{% static 'main/css/booking.css' %}">
+    <style>
+        #timeTable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #timeTable td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+        }
+        #timeTable td.available {
+            background-color: #fff;
+        }
+        #timeTable td.booked {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #timeTable td.selected {
+            background-color: #28a745;
+            color: #fff;
+        }
+    </style>
 {% endblock %}
 
 {% block extra_js %}
     {{ block.super }}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        // Инициализация Flatpickr для выбора даты и времени
-        document.addEventListener("DOMContentLoaded", function() {
-            flatpickr(".date-picker", {
+        document.addEventListener("DOMContentLoaded", function () {
+            const datePicker = flatpickr("#datePicker", {
                 dateFormat: "Y-m-d",
                 altInput: true,
                 altFormat: "F j, Y",
-                minDate: "today" // запрещаем выбор прошедших дат
+                minDate: "today",
+                onChange: function (selectedDates, dateStr) {
+                    fetchSlots(dateStr);
+                }
             });
-            flatpickr(".time-picker", {
-                enableTime: true,
-                noCalendar: true,
-                dateFormat: "H:i",
-                time_24hr: true,
+
+            const table = document.getElementById("timeTable");
+            const submitButton = document.getElementById("submitButton");
+            const selectedSlotInput = document.getElementById("selectedSlot");
+
+            table.addEventListener("click", function (e) {
+                if (e.target.tagName === "TD" && e.target.classList.contains("available")) {
+                    // Убираем выделение с предыдущей ячейки
+                    table.querySelectorAll("td").forEach(td => td.classList.remove("selected"));
+                    // Выделяем текущую ячейку
+                    e.target.classList.add("selected");
+                    // Сохраняем выбранное время
+                    selectedSlotInput.value = e.target.getAttribute("data-time");
+                    // Активируем кнопку
+                    submitButton.disabled = false;
+                }
             });
+
+            function fetchSlots(date) {
+                fetch(`/get-available-slots/?service_id={{ service.id }}&date=${date}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Очищаем старые состояния
+                        const rows = table.querySelectorAll("tr");
+                        rows.forEach(row => {
+                            const time = row.getAttribute("data-time");
+                            const cell = row.querySelector("td");
+                            if (cell) {
+                                cell.classList.remove("available", "booked", "selected");
+                                // Устанавливаем новое состояние
+                                if (data.available_slots.includes(time)) {
+                                    cell.classList.add("available");
+                                } else {
+                                    cell.classList.add("booked");
+                                }
+                            }
+                        });
+                        // Показываем таблицу
+                        document.getElementById("timeTableWrapper").style.display = "block";
+                    })
+                    .catch(error => {
+                        console.error("Error fetching slots:", error);
+                    });
+            }
         });
     </script>
 {% endblock %}
-
-
